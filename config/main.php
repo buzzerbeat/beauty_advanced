@@ -33,6 +33,9 @@ return [
             'showScriptName' => false,
             'rules' => [
                 ['class' => 'yii\rest\UrlRule', 'controller' => 'album'],
+                ['class' => 'yii\rest\UrlRule', 'controller' => 'tag'],
+                'GET,HEAD albums/<sid>' => 'album/view',
+                'GET,HEAD tags/<sid>' => 'tag/view',
             ],
         ],
     ],

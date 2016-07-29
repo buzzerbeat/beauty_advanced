@@ -29,19 +29,19 @@ class AlbumController extends Controller
         $behaviors = parent::behaviors();
         $behaviors['authenticator'] = [
             'class' => HttpBearerAuth::className(),
-            'only' => ['fav',  'like', 'fav-list', 'like-list'],
+            'only' => ['fav',  'like', 'fav-list', 'like-list', 'dig-image', 'bury-image'],
         ];
 
         return $behaviors;
     }
     public function actionIndex()
     {
-        $tagId = \yii::$app->request->get('tagId');
+        $tagSid = \yii::$app->request->get('tagId');
         $query =  Album::find();
         $where = ['status' => [Album::STATUS_ACTIVE, Album::STATUS_INACTIVE]];
         
-        if(!empty($tagId)){
-            $where['album_tag_relation.tag_id'] = $tagId;
+        if(!empty($tagSid)){
+            $where['album_tag_relation.tag_id'] = Utility::id($tagSid);
             $query = $query->joinWith('tagRelation');
         }
         return new ActiveDataProvider([
@@ -75,7 +75,7 @@ class AlbumController extends Controller
 
     public function actionView($sid)
     {
-        return MvVideo::findOne(Utility::id($sid));
+        return Album::findOne(Utility::id($sid));
     }
 
     public function actionLike()

@@ -153,7 +153,7 @@ class Album extends \yii\db\ActiveRecord
             $albums = array_merge($albumPrev, $albumNext);
             if(!empty($albums)){
                 foreach($albums as $album){
-                    $ret[] = $album['id'];
+                    $ret[] = Utility::sid($album['id']);
                     if(count($ret) == $total){
                         $enough = true;
                         break;
