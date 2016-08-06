@@ -12,7 +12,7 @@ use common\components\Utility;
  */
 class TagController extends Controller
 {
-    public $modelClass = 'app\models\Tag';
+    public $modelClass = 'beauty\models\Tag';
     public function actionIndex()
     {
         return new ActiveDataProvider([
@@ -20,8 +20,8 @@ class TagController extends Controller
         ]);
     }
     
-    public function actionView($sid){
-        return Tag::findOne(Utility::id($sid));
+    public function actionView($id){
+        return Tag::findOne($id);
     }
 
 }

@@ -20,6 +20,8 @@ use yii\data\ActiveDataProvider;
 use yii\filters\auth\HttpBearerAuth;
 use yii\rest\Controller;
 use yii\web\Response;
+use beauty\models\ImageEvaluate;
+use beauty\models\ConfigInfo;
 
 class AlbumController extends Controller
 {
@@ -36,16 +38,29 @@ class AlbumController extends Controller
     }
     public function actionIndex()
     {
-        $tagSid = \yii::$app->request->get('tagId');
+        $tagId = \yii::$app->request->get('tagId');
         $query =  Album::find();
         $where = ['status' => [Album::STATUS_ACTIVE, Album::STATUS_INACTIVE]];
         
-        if(!empty($tagSid)){
-            $where['album_tag_relation.tag_id'] = Utility::id($tagSid);
+        if(!empty($tagId)){
+            $where['album_tag_relation.tag_id'] = $tagId;
             $query = $query->joinWith('tagRelation');
         }
+        else {
+            $showBeauty = ConfigInfo::getIsShowBeauty();
+            if ($showBeauty > 1) {
+                $where["type"] = 1;
+            }
+            elseif ($showBeauty == 1) {
+                $where["type"] = 1;
+                $where["is_review"] = 1;
+            }
+            else {
+                $where["is_review"] = 1;
+            }
+        }
         return new ActiveDataProvider([
-            'query' => $query->where($where)->orderBy('id desc')
+            'query' => $query->where($where)->orderBy('rank desc')
         ]);
     }
 
@@ -73,9 +88,9 @@ class AlbumController extends Controller
         ]);
     }
 
-    public function actionView($sid)
+    public function actionView($id)
     {
-        return Album::findOne(Utility::id($sid));
+        return Album::findOne($id);
     }
 
     public function actionLike()
@@ -98,18 +113,18 @@ class AlbumController extends Controller
     }
     
     public function actionDigImage(){
-        $digForm = new ImageEvaluateForm();
-        if ($digForm->load(Yii::$app->getRequest()->post(), '') && $digForm->dig()) {
+        $evaluateForm = new ImageEvaluateForm();
+        if ($evaluateForm->load(Yii::$app->getRequest()->post(), '') && $evaluateForm->evaluate(ImageEvaluate::EVALUATE_DIG)) {
             return ["status"=>0, "message"=>""];
         }
-        return ["status"=>1, "message"=>implode(",", $digForm->getFirstErrors())];
+        return ["status"=>1, "message"=>implode(",", $evaluateForm->getFirstErrors())];
     }
     
     public function actionBuryImage(){
-        $buryForm = new ImageEvaluateForm();
-        if ($buryForm->load(Yii::$app->getRequest()->post(), '') && $buryForm->bury()) {
+        $evaluateForm = new ImageEvaluateForm();
+        if ($evaluateForm->load(Yii::$app->getRequest()->post(), '') && $evaluateForm->evaluate(ImageEvaluate::EVALUATE_BURY)) {
             return ["status"=>0, "message"=>""];
         }
-        return ["status"=>1, "message"=>implode(",", $buryForm->getFirstErrors())];
+        return ["status"=>1, "message"=>implode(",", $evaluateForm->getFirstErrors())];
     }
 }

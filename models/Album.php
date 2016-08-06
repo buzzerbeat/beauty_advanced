@@ -100,12 +100,9 @@ class Album extends \yii\db\ActiveRecord
     
     public function fields(){
         $fields = [
+            'id',
             'sid',
             'album_name',
-            'album_desc',
-            'category',
-            'cover_img',
-            'is_review',
             'imageNum'
         ];
         return $fields;
@@ -153,7 +150,7 @@ class Album extends \yii\db\ActiveRecord
             $albums = array_merge($albumPrev, $albumNext);
             if(!empty($albums)){
                 foreach($albums as $album){
-                    $ret[] = Utility::sid($album['id']);
+                    $ret[] = $album['id'];
                     if(count($ret) == $total){
                         $enough = true;
                         break;
