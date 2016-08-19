@@ -9,7 +9,6 @@
 namespace beauty\controllers;
 
 use common\components\Utility;
-//use common\models\Image;
 use beauty\models\Album;
 use beauty\models\Image;
 use beauty\models\AlbumLikeForm;
@@ -44,14 +43,14 @@ class AlbumController extends Controller
         
         if(!empty($tagId)){
             $where['album_tag_relation.tag_id'] = $tagId;
+            if (in_array($tagId, array(31, 220, 1257, 708, 664, 196, 388, 664))) {
+                $where["is_review"] = 1;
+            }
             $query = $query->joinWith('tagRelation');
         }
         else {
             $showBeauty = ConfigInfo::getIsShowBeauty();
-            if ($showBeauty > 1) {
-                $where["type"] = 1;
-            }
-            elseif ($showBeauty == 1) {
+            if ($showBeauty >= 1) {
                 $where["type"] = 1;
                 $where["is_review"] = 1;
             }

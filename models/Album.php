@@ -133,23 +133,23 @@ class Album extends \yii\db\ActiveRecord
             if($enough){
                 break;
             }
-            $albumPrev = Album::find()
+            $addWhere = '';
+            if ($this->is_review == 1) {
+                $addWhere = ' and is_review=1';
+            }
+            $albums = Album::find()
             ->select('album.id')
-            ->limit(ceil($total/2))
-            ->joinWith('tagRelation')->where('album_tag_relation.tag_id = ' . $tag->id . ' and pub_time <' . $this->pub_time)
-            ->orderBy('pub_time desc')
+            ->limit($total)
+            ->joinWith('tagRelation')
+            ->where('album_tag_relation.tag_id = ' . $tag->id . ' and type=' . $this->type . ' and status!=99' . $addWhere)
+            ->orderBy('rank asc')
             ->asArray()
             ->all();
-            $albumNext = Album::find()
-            ->select('album.id')
-            ->limit(ceil($total/2))
-            ->joinWith('tagRelation')->where('album_tag_relation.tag_id = ' . $tag->id . ' and pub_time >' . $this->pub_time)
-            ->orderBy('pub_time asc')
-            ->asArray()
-            ->all();
-            $albums = array_merge($albumPrev, $albumNext);
             if(!empty($albums)){
                 foreach($albums as $album){
+                    if ($album['id'] == $this->id) {
+                        continue;
+                    }
                     $ret[] = $album['id'];
                     if(count($ret) == $total){
                         $enough = true;
@@ -170,18 +170,18 @@ class Album extends \yii\db\ActiveRecord
     }
     
     public function getRandomImage() {
-        $cache = yii::$app->cache;
+        /*$cache = yii::$app->cache;
         $key = "randomImg_" . $this->id;
         $data = $cache->get($key);
-        if ($data === false) {
+        if ($data === false) {*/
             $images = $this->images;
             if (count($images)) {
                 $data = $images[array_rand($images)];
             } else {
                 $data = null;
             }
-            $cache->set($key, $data, 300);
-        }
+          //  $cache->set($key, $data, 300);
+        //}
         return $data;
     }
 }

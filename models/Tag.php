@@ -99,7 +99,13 @@ class Tag extends \yii\db\ActiveRecord
             }
             $ret[] = $ar;
         }
-         
+        if (count($ret) < 3 && empty($tags) && !empty($belongTags)) {
+			foreach ($ret as $tag) {
+				foreach ($tag->subTags as $subtag) {
+					$ret[] = $subtag;
+				}
+			}
+		}
         return $ret;
     }
 }

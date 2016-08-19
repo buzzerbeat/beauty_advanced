@@ -264,15 +264,21 @@ class ConfigInfo extends Model
 			) {
 			return 0;
 		}
+		if ('iostest' == $minfo['app']) {
+//			return 0;
+		}
+
 		if (
 			strstr($location, '北京') || 
+			strstr($location, '杭州') || 
+			strstr($location, '广州') || 
 			strstr($location, '上海') || 
 			strstr($location, '深圳') || 
 			0
 			) {
 			return 1;
 		}
-		if ('oppo' == $minfo['channel'] && strstr($location, '东莞')) {
+        if ('oppo' == $minfo['channel'] && strstr($location, '东莞')) {
 			return 1;
 		}
 		if ('baidu' == $minfo['channel'] && strstr($location, '福州')) {
@@ -282,13 +288,7 @@ class ConfigInfo extends Model
 			return 1;
 		}
 
-		if ($minfo['appversion'] == 10000) {
-			return 2;
-		}
-		if ('qq' == $minfo['channel']) {
-			return 2;
-		}
-		return 1;
+		return 2;
 	}
 
     public static function getIsIosInreview() {
