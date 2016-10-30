@@ -28,6 +28,23 @@ class AlbumController extends Controller
     public function behaviors()
     {
         $behaviors = parent::behaviors();
+        $behaviors[] = [
+            'class' => 'yii\filters\PageCache',
+            'only' => ['index', 'view'],
+            'duration' => 180,
+            'variations' => [
+                \yii::$app->request->get('id', 0),
+                \yii::$app->request->get('tagId', 0),
+                \yii::$app->request->get('expand', ''),
+                \yii::$app->request->get('page', 0),
+                \yii::$app->request->get('per-page', 54),
+            ],
+            'dependency' => [
+                'class' => 'common\components\BtDbDependency',
+                'sql' => 'SELECT COUNT(*) FROM album',
+            ],
+        ];
+
         $behaviors['authenticator'] = [
             'class' => HttpBearerAuth::className(),
             'only' => ['fav',  'like', 'fav-list', 'like-list', 'dig-image', 'bury-image'],
@@ -37,29 +54,29 @@ class AlbumController extends Controller
     }
     public function actionIndex()
     {
-        $tagId = \yii::$app->request->get('tagId');
+        $tagId = \yii::$app->request->get('tagId', 0);
         $query =  Album::find();
         $where = ['status' => [Album::STATUS_ACTIVE, Album::STATUS_INACTIVE]];
-        
-        if(!empty($tagId)){
+        if($tagId > 0){
             $where['album_tag_relation.tag_id'] = $tagId;
             if (in_array($tagId, array(31, 220, 1257, 708, 664, 196, 388, 664))) {
                 $where["is_review"] = 1;
             }
             $query = $query->joinWith('tagRelation');
         }
-        else {
-            $showBeauty = ConfigInfo::getIsShowBeauty();
-            if ($showBeauty >= 1) {
-                $where["type"] = 1;
-                $where["is_review"] = 1;
+        $query->where($where);
+        if ($tagId <= 0) {
+            $query->andWhere(["is_review" => 1]);
+            if ($tagId == -2) {
+                $query->andWhere('type != 1');
             }
             else {
-                $where["is_review"] = 1;
+                $query->andWhere(['type' => 1]);
             }
         }
+
         return new ActiveDataProvider([
-            'query' => $query->where($where)->orderBy('rank desc')
+            'query' => $query->orderBy('rank desc')
         ]);
     }
 
